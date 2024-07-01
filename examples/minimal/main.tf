@@ -11,7 +11,7 @@
 // limitations under the License.
 
 module "secretsmanager_secret" {
-  source  = "d2lqlh14iel5k2.cloudfront.net/module_primitive/secretsmanager_secret/aws"
+  source  = "terraform.registry.launch.nttdata.com/module_primitive/secretsmanager_secret/aws"
   version = "~> 1.0"
 
   name                    = module.resource_names["secret"].minimal_random_suffix
@@ -20,7 +20,7 @@ module "secretsmanager_secret" {
 }
 
 module "resource_names" {
-  source  = "d2lqlh14iel5k2.cloudfront.net/module_library/resource_name/launch"
+  source  = "terraform.registry.launch.nttdata.com/module_library/resource_name/launch"
   version = "~> 1.0"
 
   for_each = var.resource_names_map
