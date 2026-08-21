@@ -44,16 +44,13 @@ func TestComposableComplete(t *testing.T, ctx types.TestContext) {
 			SecretId:     &secretId,
 			SecretString: &password,
 		})
-		if err != nil {
-			t.Errorf("Failure during PutSecretValue: %v", err)
-		}
+		require.NoError(t, err, "PutSecretValue should succeed before GetSecretValue")
 
 		retrieved, err := secretsManagerClient.GetSecretValue(context.TODO(), &secretsmanager.GetSecretValueInput{
 			SecretId: &secretId,
 		})
-		if err != nil {
-			t.Errorf("Failure during GetSecretValue: %v", err)
-		}
+		require.NoError(t, err, "GetSecretValue after PutSecretValue should find AWSCURRENT")
+		require.NotNil(t, retrieved.SecretString, "GetSecretValue returned no SecretString")
 
 		assert.Equal(t, *retrieved.SecretString, password, "Expected SecretString did not match actual SecretString!")
 
