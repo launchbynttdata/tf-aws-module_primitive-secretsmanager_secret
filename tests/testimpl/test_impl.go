@@ -15,6 +15,31 @@ import (
 )
 
 func TestComposableComplete(t *testing.T, ctx types.TestContext) {
+	TestComposableCompleteReadonly(t, ctx)
+
+	secretsManagerClient := GetAWSSecretsManagerClient(t)
+	secretId := terraform.Output(t, ctx.TerratestTerraformOptions(), "secret_id")
+
+	t.Run("TestSecretsManagerSecretCanBeSet", func(t *testing.T) {
+		password := GeneratePassword(16)
+
+		_, err := secretsManagerClient.PutSecretValue(context.TODO(), &secretsmanager.PutSecretValueInput{
+			SecretId:     &secretId,
+			SecretString: &password,
+		})
+		require.NoError(t, err, "PutSecretValue should succeed before GetSecretValue")
+
+		retrieved, err := secretsManagerClient.GetSecretValue(context.TODO(), &secretsmanager.GetSecretValueInput{
+			SecretId: &secretId,
+		})
+		require.NoError(t, err, "GetSecretValue after PutSecretValue should find AWSCURRENT")
+		require.NotNil(t, retrieved.SecretString, "GetSecretValue returned no SecretString")
+
+		assert.Equal(t, *retrieved.SecretString, password, "Expected SecretString did not match actual SecretString!")
+	})
+}
+
+func TestComposableCompleteReadonly(t *testing.T, ctx types.TestContext) {
 	secretsManagerClient := GetAWSSecretsManagerClient(t)
 
 	secretId := terraform.Output(t, ctx.TerratestTerraformOptions(), "secret_id")
@@ -35,28 +60,6 @@ func TestComposableComplete(t *testing.T, ctx types.TestContext) {
 			SecretId: &secretId,
 		})
 		assert.NotNil(t, err, "Secret shouldn't contain an initial value!")
-	})
-
-	t.Run("TestSecretsManagerSecretCanBeSet", func(t *testing.T) {
-		password := GeneratePassword(16)
-
-		_, err := secretsManagerClient.PutSecretValue(context.TODO(), &secretsmanager.PutSecretValueInput{
-			SecretId:     &secretId,
-			SecretString: &password,
-		})
-		if err != nil {
-			t.Errorf("Failure during PutSecretValue: %v", err)
-		}
-
-		retrieved, err := secretsManagerClient.GetSecretValue(context.TODO(), &secretsmanager.GetSecretValueInput{
-			SecretId: &secretId,
-		})
-		if err != nil {
-			t.Errorf("Failure during GetSecretValue: %v", err)
-		}
-
-		assert.Equal(t, *retrieved.SecretString, password, "Expected SecretString did not match actual SecretString!")
-
 	})
 }
 
