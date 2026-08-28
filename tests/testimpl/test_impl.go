@@ -18,7 +18,7 @@ func TestComposableComplete(t *testing.T, ctx types.TestContext) {
 	TestComposableCompleteReadonly(t, ctx)
 
 	secretsManagerClient := GetAWSSecretsManagerClient(t)
-	secretId := terraform.Output(t, ctx.TerratestTerraformOptions(), "secret_id")
+	secretId := terraform.OutputContext(t, context.Background(), ctx.TerratestTerraformOptions(), "secret_id")
 
 	t.Run("TestSecretsManagerSecretCanBeSet", func(t *testing.T) {
 		password := GeneratePassword(16)
@@ -42,8 +42,8 @@ func TestComposableComplete(t *testing.T, ctx types.TestContext) {
 func TestComposableCompleteReadonly(t *testing.T, ctx types.TestContext) {
 	secretsManagerClient := GetAWSSecretsManagerClient(t)
 
-	secretId := terraform.Output(t, ctx.TerratestTerraformOptions(), "secret_id")
-	secretArn := terraform.Output(t, ctx.TerratestTerraformOptions(), "secret_arn")
+	secretId := terraform.OutputContext(t, context.Background(), ctx.TerratestTerraformOptions(), "secret_id")
+	secretArn := terraform.OutputContext(t, context.Background(), ctx.TerratestTerraformOptions(), "secret_arn")
 
 	t.Run("TestSecretsManagerSecretExists", func(t *testing.T) {
 		secret, err := secretsManagerClient.DescribeSecret(context.TODO(), &secretsmanager.DescribeSecretInput{
